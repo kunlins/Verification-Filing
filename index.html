@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>验证文件目录生成工具</title>
+  <style>
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+      color: #1d2433;
+      background: #8f2b2f;
+      --ink: #162036;
+      --ink-soft: #29354c;
+      --brand-red: #8f2b2f;
+      --brand-red-dark: #762226;
+      --gold: #d6b06d;
+      --gold-soft: #f0dfbe;
+      --line: #e4d5c6;
+      --paper: #fff8ef;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 34px;
+      background:
+        linear-gradient(135deg, rgba(118, 34, 38, 0.98), rgba(143, 43, 47, 0.94)) 0 0 / 100% 100% no-repeat,
+        var(--brand-red);
+    }
+    .container { max-width: 1120px; margin: 0 auto; }
+    .brand-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      color: #fff;
+      margin-bottom: 34px;
+    }
+    .brand { min-width: 0; }
+    .brand-logo {
+      display: inline-block;
+      color: #fff;
+      line-height: 1;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+    }
+    .brand-cn {
+      display: block;
+      font-family: "Noto Serif SC", "Songti SC", STSong, SimSun, serif;
+      font-size: 33px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .brand-rule {
+      display: block;
+      height: 1px;
+      margin: 12px 0 11px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+    .brand-en {
+      display: block;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 27px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .motto {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      white-space: nowrap;
+    }
+    .team-badge {
+      text-align: right;
+      color: #fff;
+    }
+    .team-name {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 25px;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+    }
+    .creator {
+      display: block;
+      margin-top: 10px;
+      color: rgba(255, 255, 255, 0.66);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+    }
+    .view { display: block; }
+    .view[hidden] { display: none; }
+    .hero {
+      background: var(--white);
+      border: 1px solid rgba(222, 215, 202, 0.95);
+      border-radius: 8px;
+      padding: 34px;
+      box-shadow: 0 22px 58px rgba(58, 14, 17, 0.22);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 34px;
+      align-items: stretch;
+    }
+    .intro {
+      border-left: 3px solid var(--gold);
+      padding-left: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 300px;
+    }
+    .eyebrow {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+      font-size: 42px;
+      font-weight: 500;
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
+    p { line-height: 1.65; margin: 8px 0; color: #5b6170; }
+    .lead {
+      max-width: 360px;
+      margin-top: 18px;
+      color: #5d6474;
+      font-size: 16px;
+    }
+    .panel {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .upload-card {
+      position: relative;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 26px;
+      background: linear-gradient(180deg, #ffffff, #fffaf2);
+      min-height: 160px;
+      cursor: pointer;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+    .upload-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 16px 34px rgba(95, 35, 24, 0.12);
+      transform: translateY(-1px);
+    }
+    .upload-card h2 {
+      margin: 0 0 10px;
+      color: var(--ink);
+      font-size: 20px;
+      font-weight: 650;
+    }
+    .upload-card p {
+      max-width: 360px;
+      margin: 0;
+      color: #636a78;
+      font-size: 14px;
+    }
+    .upload-card input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .card-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+    }
+    .card-kicker::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: var(--gold);
+    }
+    .result-shell {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 22px 58px rgba(58, 14, 17, 0.22);
+    }
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .result-title h1 {
+      font-size: 32px;
+    }
+    .result-title p {
+      margin-top: 9px;
+      font-size: 14px;
+      color: #69707e;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .section-field {
+      margin-top: 16px;
+      max-width: 420px;
+    }
+    .section-field label {
+      display: block;
+      margin-bottom: 7px;
+      color: #626979;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .section-field input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 11px 12px;
+      color: var(--ink);
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    .section-field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(214, 176, 109, 0.22);
+    }
+    button {
+      appearance: none;
+      border: 1px solid var(--ink);
+      border-radius: 4px;
+      padding: 11px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 650;
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      background: #f7f1e8;
+      color: #5a4630;
+      border: 1px solid #eadbc5;
+      display: none;
+    }
+    .status.error {
+      background: #fff0f0;
+      color: #a11d1d;
+      border-color: #f1c6c6;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+      display: none;
+    }
+    .summary div {
+      background: #fffaf2;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 15px;
+      color: #626979;
+      font-size: 13px;
+    }
+    .summary strong {
+      display: block;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      font-weight: 500;
+      margin-top: 6px;
+    }
+    .custom-party {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fffaf2;
+    }
+    .custom-party label {
+      display: grid;
+      gap: 7px;
+      min-width: min(360px, 100%);
+      color: #626979;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .custom-party input {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 10px 11px;
+      color: var(--ink);
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    .custom-party input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(214, 176, 109, 0.22);
+    }
+    .custom-party button {
+      flex: 0 0 auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      display: none;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid #ebe5da;
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+    th {
+      background: #f7f1e8;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+    tr:last-child td { border-bottom: 0; }
+    td.files { white-space: pre-wrap; line-height: 1.55; }
+    .party-picker {
+      position: relative;
+      min-width: 210px;
+    }
+    .party-picker summary {
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 9px 10px;
+      background: #fffaf2;
+      color: var(--ink);
+      cursor: pointer;
+      list-style: none;
+      line-height: 1.45;
+    }
+    .party-picker summary::-webkit-details-marker {
+      display: none;
+    }
+    .party-options {
+      margin-top: 6px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 10px 22px rgba(58, 14, 17, 0.12);
+    }
+    .party-options label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 6px;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+    .party-options input {
+      flex: 0 0 auto;
+    }
+    .note {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #6f746f;
+    }
+    .example-trigger {
+      position: fixed;
+      left: 24px;
+      bottom: 24px;
+      z-index: 20;
+      border-color: rgba(255, 255, 255, 0.64);
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--brand-red-dark);
+      box-shadow: 0 12px 28px rgba(58, 14, 17, 0.22);
+    }
+    .example-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background: rgba(24, 12, 12, 0.58);
+    }
+    .example-modal[hidden] {
+      display: none;
+    }
+    .example-dialog {
+      width: min(1120px, 100%);
+      max-height: min(86vh, 900px);
+      overflow: auto;
+      background: #fffaf2;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 28px 68px rgba(20, 8, 8, 0.34);
+    }
+    .example-head {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 22px;
+      background: #fffaf2;
+      border-bottom: 1px solid var(--line);
+    }
+    .example-head h2 {
+      margin: 0;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+      font-size: 26px;
+      font-weight: 500;
+    }
+    .example-close {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-color: var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1;
+    }
+    .example-gallery {
+      display: grid;
+      gap: 18px;
+      padding: 22px;
+    }
+    .example-card {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .example-card figcaption {
+      padding: 12px 14px;
+      background: #f7f1e8;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+    .example-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    @media (max-width: 760px) {
+      body { padding: 18px; }
+      .brand-bar,
+      .result-head { flex-direction: column; align-items: flex-start; }
+      .team-badge { text-align: left; }
+      .motto { white-space: normal; line-height: 1.8; }
+      .brand-cn { font-size: 24px; }
+      .brand-en { font-size: 19px; }
+      .hero,
+      .result-shell { padding: 22px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 24px; }
+      .intro { min-height: auto; padding-left: 18px; }
+      h1 { font-size: 33px; }
+      .result-title h1 { font-size: 28px; }
+      .summary { grid-template-columns: 1fr; }
+      .example-trigger {
+        left: 18px;
+        bottom: 18px;
+      }
+      .example-modal {
+        padding: 16px;
+      }
+      .example-head {
+        padding: 16px;
+      }
+      .example-head h2 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="brand-bar">
+      <div class="brand">
+        <div class="brand-logo" aria-label="競天公誠律師事務所 Jingtian & Gongcheng">
+          <span class="brand-cn">競天公誠律師事務所</span>
+          <span class="brand-rule"></span>
+          <span class="brand-en">Jingtian &amp; Gongcheng</span>
+        </div>
+      </div>
+      <div class="team-badge">
+        <span class="team-name">SS Team</span>
+        <div class="motto">专业&nbsp;&nbsp;平等&nbsp;&nbsp;包容&nbsp;&nbsp;合作</div>
+        <span class="creator">Created by 小宋</span>
+      </div>
+    </header>
+
+    <main>
+      <section id="startView" class="hero view">
+        <div class="hero-grid">
+          <div class="intro">
+            <div class="eyebrow">DOCUMENT REVIEW</div>
+            <h1>验证文件目录生成工具</h1>
+            <div class="lead">
+              <p>请先将本章节验证文件统一放入一个总文件夹，再点击右侧选择该总文件夹。</p>
+              <p>推荐做法：按照招股书编号建立子文件夹，例如 H1、H2.1、H10-13；同一编号对应的验证文件放入对应编号文件夹。若项目编号不含字母，也可直接使用 1、2.1、10-13。</p>
+              <p>也可以直接给文件命名：编号 + 空格/横线 + 文件名。例如 H1 研发保密协议.pdf、H1-研发保密协议.pdf 会归入 H1；H1-3-范围资料.pdf 会归入 H1-3。</p>
+              <p>上传后请检查自动生成的编号和文件名，填写 Word 标题章节，并为每一行确认责任方；确认无误后点击“导出 Word”生成验证笔记。</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <label class="upload-card">
+              <span class="card-kicker">FOLDER</span>
+              <h2>选择文件夹</h2>
+              <p>请选择已经按编号整理好的总文件夹。</p>
+              <input id="folderInput" type="file" webkitdirectory directory multiple />
+            </label>
+          </div>
+        </div>
+        <div id="status" class="status"></div>
+      </section>
+
+      <section id="resultView" class="result-shell view" hidden>
+        <div class="result-head">
+          <div class="result-title">
+            <div class="eyebrow">ANALYSIS RESULT</div>
+            <h1>分析结果</h1>
+            <p id="resultMeta">已完成文件目录分析。</p>
+            <div class="section-field">
+              <label for="sectionInput">Word 标题章节</label>
+              <input id="sectionInput" type="text" placeholder="例如：董监高章节" />
+            </div>
+          </div>
+          <div class="toolbar">
+            <button id="wordBtn" disabled>导出 Word</button>
+            <button id="clearBtn" class="secondary">重新选择</button>
+          </div>
+        </div>
+
+        <div id="summary" class="summary">
+          <div>编号条目数量<strong id="folderCount">0</strong></div>
+          <div>文件总数<strong id="fileCount">0</strong></div>
+          <div>默认确认项<strong id="emptyCount">0</strong></div>
+        </div>
+
+        <div class="custom-party">
+          <label for="customPartyInput">
+            新增责任方
+            <input id="customPartyInput" type="text" placeholder="例如：境外律师、评估师、税务顾问" />
+          </label>
+          <button id="addPartyBtn" class="secondary" type="button">加入选项</button>
+        </div>
+
+        <table id="resultTable">
+          <thead>
+            <tr>
+              <th style="width: 18%;">编号</th>
+              <th>对应文件名</th>
+              <th style="width: 24%;">责任方</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+
+        <p class="note">自动过滤：__MACOSX、.DS_Store、Thumbs.db、desktop.ini、以 ._ 开头的 macOS 资源文件。编号支持 H1、H2.1、H10-13、1、2.1、10-13，以及“RF27 文件名.pdf”“27 文件名.pdf”“H1-文件名.pdf”“H1-3-文件名.pdf”这类编号开头的文件。</p>
+      </section>
+    </main>
+  </div>
+
+  <button id="exampleBtn" class="example-trigger" type="button">成果示例</button>
+
+  <div id="exampleModal" class="example-modal" role="dialog" aria-modal="true" aria-labelledby="exampleTitle" hidden>
+    <div class="example-dialog">
+      <div class="example-head">
+        <h2 id="exampleTitle">成果示例</h2>
+        <button id="exampleCloseBtn" class="example-close" type="button" aria-label="关闭成果示例">×</button>
+      </div>
+      <div class="example-gallery">
+        <figure class="example-card">
+          <figcaption>1. 按招股书编号整理验证文件夹</figcaption>
+          <img src="assets/example-folder.png" alt="按编号整理的验证文件夹示例" />
+        </figure>
+        <figure class="example-card">
+          <figcaption>2. 上传后生成网页分析结果</figcaption>
+          <img src="assets/example-result.png" alt="网页分析结果示例" />
+        </figure>
+        <figure class="example-card">
+          <figcaption>3. 导出 Word 后的验证笔记表格</figcaption>
+          <img src="assets/example-word.png" alt="Word 验证笔记表格示例" />
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const folderInput = document.getElementById('folderInput');
+    const startView = document.getElementById('startView');
+    const resultView = document.getElementById('resultView');
+    const wordBtn = document.getElementById('wordBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const sectionInput = document.getElementById('sectionInput');
+    const statusEl = document.getElementById('status');
+    const resultMetaEl = document.getElementById('resultMeta');
+    const summaryEl = document.getElementById('summary');
+    const resultTable = document.getElementById('resultTable');
+    const resultBody = document.getElementById('resultBody');
+    const folderCountEl = document.getElementById('folderCount');
+    const fileCountEl = document.getElementById('fileCount');
+    const emptyCountEl = document.getElementById('emptyCount');
+    const customPartyInput = document.getElementById('customPartyInput');
+    const addPartyBtn = document.getElementById('addPartyBtn');
+    const exampleBtn = document.getElementById('exampleBtn');
+    const exampleModal = document.getElementById('exampleModal');
+    const exampleCloseBtn = document.getElementById('exampleCloseBtn');
+
+    let responsibilityOptions = [
+      '公司/董事',
+      '公司境内律师',
+      '审计师圈数',
+      '行业顾问',
+      '制裁律师',
+      'ESG顾问',
+      '内控顾问',
+      '数据律师',
+      '保荐人'
+    ];
+    const defaultResponsibility = ['公司/董事'];
+
+    let rows = [];
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.className = isError ? 'status error' : 'status';
+      statusEl.style.display = message ? 'block' : 'none';
+    }
+
+    function showStartView() {
+      startView.hidden = false;
+      resultView.hidden = true;
+    }
+
+    function showResultView() {
+      startView.hidden = true;
+      resultView.hidden = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openExampleModal() {
+      exampleModal.hidden = false;
+      exampleCloseBtn.focus();
+    }
+
+    function closeExampleModal() {
+      exampleModal.hidden = true;
+      exampleBtn.focus();
+    }
+
+    function isHiddenOrSystemPath(parts) {
+      return parts.some(part => {
+        const lower = part.toLowerCase();
+        return lower === '__macosx' ||
+          lower === '.ds_store' ||
+          lower === 'thumbs.db' ||
+          lower === 'desktop.ini' ||
+          part.startsWith('._') ||
+          part === '';
+      });
+    }
+
+    function normalizePath(path) {
+      return path.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/, '');
+    }
+
+    const codePattern = '(?:[A-Za-z]+)?\\d+(?:\\.\\d+)*(?:-\\d+)?';
+    const codeOnlyRegex = new RegExp(`^${codePattern}$`, 'i');
+    const prefixedFileRegex = new RegExp(`^(${codePattern})(?:\\s+|-)(.+)$`, 'i');
+
+    function getUsefulParts(path) {
+      const parts = normalizePath(path).split('/').filter(Boolean);
+      if (!parts.length || isHiddenOrSystemPath(parts)) return null;
+
+      const firstCodeIndex = parts.findIndex(part => codeOnlyRegex.test(part));
+      if (firstCodeIndex >= 0) return parts.slice(firstCodeIndex);
+
+      const prefixedFileIndex = parts.findIndex(part => prefixedFileRegex.test(part));
+      if (prefixedFileIndex >= 0) {
+        const [, code, fileName] = parts[prefixedFileIndex].match(prefixedFileRegex);
+        return [code, fileName, ...parts.slice(prefixedFileIndex + 1)];
+      }
+
+      if (parts.length >= 2) return parts.slice(1);
+      return null;
+    }
+
+    function naturalCompare(a, b) {
+      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+    }
+
+    function compareLevelArrays(a, b) {
+      const maxLength = Math.max(a.length, b.length);
+      for (let index = 0; index < maxLength; index += 1) {
+        const left = a[index];
+        const right = b[index];
+        if (left === undefined) return -1;
+        if (right === undefined) return 1;
+        if (left !== right) return left - right;
+      }
+      return 0;
+    }
+
+    function parseCode(code) {
+      const match = String(code).match(/^([A-Za-z]*)(\d+(?:\.\d+)*)(?:-(\d+))?$/);
+      if (!match) return null;
+      const levels = match[2].split('.').map(Number);
+      const base = levels[0];
+      const rangeEnd = match[3] ? Math.max(base, Number(match[3])) : null;
+      return {
+        prefix: match[1].toUpperCase(),
+        base,
+        levels,
+        rangeEnd,
+        isRange: rangeEnd !== null
+      };
+    }
+
+    function createDefaultRow(code) {
+      return {
+        编号: code,
+        对应文件名: '董事/公司确认',
+        文件数量: 0,
+        责任方: [...defaultResponsibility],
+        autoFilled: true
+      };
+    }
+
+    function expandCodeRows(sourceRows) {
+      const grouped = new Map();
+      const otherRows = [];
+
+      for (const row of sourceRows) {
+        const parsed = parseCode(row.编号);
+        row.责任方 = row.责任方 && row.责任方.length ? row.责任方 : [...defaultResponsibility];
+        if (!row.对应文件名) row.对应文件名 = '董事/公司确认';
+        if (!parsed) {
+          otherRows.push(row);
+          continue;
+        }
+        if (!grouped.has(parsed.prefix)) grouped.set(parsed.prefix, []);
+        grouped.get(parsed.prefix).push({ row, parsed });
+      }
+
+      const expandedRows = [];
+      const prefixes = Array.from(grouped.keys()).sort(naturalCompare);
+
+      for (const prefix of prefixes) {
+        const entries = grouped.get(prefix);
+        const maxBase = Math.max(...entries.map(entry => entry.parsed.rangeEnd || entry.parsed.base));
+        const explicitByBase = new Map();
+        const rangesByBase = new Map();
+
+        for (const entry of entries) {
+          if (entry.parsed.isRange) {
+            if (!rangesByBase.has(entry.parsed.base)) rangesByBase.set(entry.parsed.base, []);
+            rangesByBase.get(entry.parsed.base).push(entry);
+            continue;
+          }
+          if (!explicitByBase.has(entry.parsed.base)) explicitByBase.set(entry.parsed.base, []);
+          explicitByBase.get(entry.parsed.base).push(entry);
+        }
+
+        for (let base = 1; base <= maxBase; base += 1) {
+          const baseCode = `${prefix}${base}`;
+          const explicitEntries = (explicitByBase.get(base) || [])
+            .sort((a, b) => compareLevelArrays(a.parsed.levels, b.parsed.levels) || naturalCompare(a.row.编号, b.row.编号));
+          const hasBaseRow = explicitEntries.some(entry => entry.parsed.levels.length === 1);
+          if (!hasBaseRow && explicitEntries.length > 0) {
+            expandedRows.push(createDefaultRow(baseCode));
+          }
+          for (const entry of explicitEntries) {
+            expandedRows.push(entry.row);
+          }
+
+          const rangeEntries = (rangesByBase.get(base) || [])
+            .sort((a, b) => (a.parsed.rangeEnd - b.parsed.rangeEnd) || naturalCompare(a.row.编号, b.row.编号));
+          if (explicitEntries.length === 0 && rangeEntries.length === 0) {
+            expandedRows.push(createDefaultRow(baseCode));
+          }
+          for (const entry of rangeEntries) {
+            expandedRows.push(entry.row);
+          }
+
+          if (rangeEntries.length) {
+            let coveredEnd = Math.max(base, ...rangeEntries.map(entry => entry.parsed.rangeEnd));
+            for (let coveredBase = base + 1; coveredBase <= coveredEnd; coveredBase += 1) {
+              const coveredExplicitEntries = (explicitByBase.get(coveredBase) || [])
+                .sort((a, b) => compareLevelArrays(a.parsed.levels, b.parsed.levels) || naturalCompare(a.row.编号, b.row.编号));
+              const hasCoveredBaseRow = coveredExplicitEntries.some(entry => entry.parsed.levels.length === 1);
+              if (!hasCoveredBaseRow && coveredExplicitEntries.length > 0) {
+                expandedRows.push(createDefaultRow(`${prefix}${coveredBase}`));
+              }
+              for (const entry of coveredExplicitEntries) {
+                expandedRows.push(entry.row);
+              }
+
+              const coveredRangeEntries = (rangesByBase.get(coveredBase) || [])
+                .sort((a, b) => (a.parsed.rangeEnd - b.parsed.rangeEnd) || naturalCompare(a.row.编号, b.row.编号));
+              for (const entry of coveredRangeEntries) {
+                expandedRows.push(entry.row);
+                coveredEnd = Math.max(coveredEnd, entry.parsed.rangeEnd);
+              }
+            }
+            base = coveredEnd;
+          }
+        }
+      }
+
+      return expandedRows.concat(otherRows.sort((a, b) => naturalCompare(a.编号, b.编号)));
+    }
+
+    function getDisplayFileName(row) {
+      return row.对应文件名 || '董事/公司确认';
+    }
+
+    function getResponsibilityText(row) {
+      return row.责任方 && row.责任方.length ? row.责任方.join('，') : '';
+    }
+
+    function rerenderRows() {
+      if (!rows.length) return;
+      resultBody.innerHTML = '';
+      for (const row of rows) {
+        const tr = document.createElement('tr');
+        const codeTd = document.createElement('td');
+        const filesTd = document.createElement('td');
+        const responsibilityTd = document.createElement('td');
+        codeTd.textContent = row.编号;
+        filesTd.textContent = getDisplayFileName(row);
+        filesTd.className = 'files';
+        responsibilityTd.appendChild(createResponsibilityPicker(row));
+        tr.appendChild(codeTd);
+        tr.appendChild(filesTd);
+        tr.appendChild(responsibilityTd);
+        resultBody.appendChild(tr);
+      }
+    }
+
+    function addCustomResponsibility() {
+      const newParty = customPartyInput.value.trim();
+      if (!newParty) return;
+      const exists = responsibilityOptions.some(option => option.toLowerCase() === newParty.toLowerCase());
+      if (!exists) {
+        responsibilityOptions = [...responsibilityOptions, newParty];
+        rerenderRows();
+      }
+      customPartyInput.value = '';
+      customPartyInput.focus();
+    }
+
+    function createResponsibilityPicker(row) {
+      const details = document.createElement('details');
+      details.className = 'party-picker';
+
+      const summary = document.createElement('summary');
+      summary.textContent = getResponsibilityText(row) || '选择责任方';
+      details.appendChild(summary);
+
+      const optionBox = document.createElement('div');
+      optionBox.className = 'party-options';
+
+      for (const option of responsibilityOptions) {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = option;
+        checkbox.checked = row.责任方.includes(option);
+        checkbox.addEventListener('change', () => {
+          row.责任方 = Array.from(optionBox.querySelectorAll('input:checked')).map(input => input.value);
+          summary.textContent = getResponsibilityText(row) || '选择责任方';
+        });
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(option));
+        optionBox.appendChild(label);
+      }
+
+      details.appendChild(optionBox);
+      return details;
+    }
+
+    function buildRows(paths, folderPaths = []) {
+      const map = new Map();
+      const allFolders = new Set();
+
+      for (const folderPath of folderPaths) {
+        const parts = getUsefulParts(folderPath);
+        if (parts && parts.length >= 1) {
+          allFolders.add(parts[0].toUpperCase());
+        }
+      }
+
+      for (const rawPath of paths) {
+        const parts = getUsefulParts(rawPath);
+        if (!parts || parts.length < 2) continue;
+
+        const code = parts[0].toUpperCase();
+        const relativeFileName = parts.slice(1).join('/');
+        if (!relativeFileName || isHiddenOrSystemPath([relativeFileName])) continue;
+
+        allFolders.add(code);
+        if (!map.has(code)) map.set(code, []);
+        map.get(code).push(relativeFileName);
+      }
+
+      const codes = Array.from(allFolders).sort(naturalCompare);
+      const sourceRows = codes.map(code => {
+        const files = (map.get(code) || []).sort(naturalCompare);
+        return {
+          编号: code,
+          对应文件名: files.length ? files.join('\r\n') : '',
+          文件数量: files.length,
+          责任方: [...defaultResponsibility]
+        };
+      });
+      return expandCodeRows(sourceRows);
+    }
+
+    function render(nextRows) {
+      rows = nextRows;
+      rerenderRows();
+
+      const totalFiles = rows.reduce((sum, row) => sum + row.文件数量, 0);
+      const emptyFolders = rows.filter(row => row.文件数量 === 0).length;
+      folderCountEl.textContent = rows.length;
+      fileCountEl.textContent = totalFiles;
+      emptyCountEl.textContent = emptyFolders;
+
+      const hasRows = rows.length > 0;
+      summaryEl.style.display = hasRows ? 'grid' : 'none';
+      resultTable.style.display = hasRows ? 'table' : 'none';
+      wordBtn.disabled = !hasRows;
+      if (hasRows) {
+        resultMetaEl.textContent = `生成 ${rows.length} 个编号条目，共 ${totalFiles} 个文件。`;
+        setStatus('');
+        showResultView();
+      } else {
+        resultMetaEl.textContent = '已完成文件目录分析。';
+        showStartView();
+      }
+    }
+
+    function handleFolderFiles(fileList) {
+      const files = Array.from(fileList || []);
+      const paths = files.map(file => file.webkitRelativePath || file.name);
+      const nextRows = buildRows(paths, []);
+      if (!nextRows.length) {
+        render([]);
+        setStatus('未识别到有效编号文件夹。请确认选择的文件夹下是否包含 B1、B2、B3 等子文件夹。', true);
+        return;
+      }
+      render(nextRows);
+    }
+
+    function escapeXml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function sanitizeFileName(value) {
+      return String(value || '验证笔记')
+        .replace(/[\\/:*?"<>|]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim() || '验证笔记';
+    }
+
+    function wordRun(text, options = {}) {
+      const bold = options.bold ? '<w:b/>' : '';
+      const color = options.color ? `<w:color w:val="${options.color}"/>` : '';
+      const size = options.size || 21;
+      return `<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="宋体"/>${bold}${color}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/></w:rPr><w:t xml:space="preserve">${escapeXml(text)}</w:t></w:r>`;
+    }
+
+    function wordParagraph(text, options = {}) {
+      const align = options.align || 'left';
+      const after = options.after ?? 0;
+      const before = options.before ?? 0;
+      const lines = String(text ?? '').split(/\r?\n/);
+      const content = lines.map((line, index) => {
+        const br = index === 0 ? '' : '<w:br/>';
+        return `<w:r>${br}</w:r>${wordRun(line, options)}`;
+      }).join('');
+      return `<w:p><w:pPr><w:jc w:val="${align}"/><w:spacing w:before="${before}" w:after="${after}" w:line="276" w:lineRule="auto"/></w:pPr>${content}</w:p>`;
+    }
+
+    function wordCell(text, width, options = {}) {
+      const fill = options.fill ? `<w:shd w:fill="${options.fill}"/>` : '';
+      const vAlign = options.header ? 'center' : 'top';
+      const paragraphs = String(text ?? '')
+        .split(/\r?\n/)
+        .map(line => wordParagraph(line, {
+          bold: options.header,
+          color: options.header ? 'FFFFFF' : '000000',
+          size: options.header ? 22 : 20,
+          after: 0,
+          before: 0
+        }))
+        .join('');
+      return `<w:tc><w:tcPr><w:tcW w:w="${width}" w:type="dxa"/><w:vAlign w:val="${vAlign}"/>${fill}<w:tcMar><w:top w:w="90" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar></w:tcPr>${paragraphs}</w:tc>`;
+    }
+
+    function wordRow(cells, isHeader = false) {
+      const widths = [1270, 7940, 2890, 2300];
+      return `<w:tr>${cells.map((cell, index) => wordCell(cell, widths[index], {
+        header: isHeader,
+        fill: isHeader ? '8F2B2F' : ''
+      })).join('')}</w:tr>`;
+    }
+
+    function buildWordDocumentXml(title, tableRows) {
+      const bodyRows = tableRows.map(row => wordRow([
+        row.编号,
+        row.对应文件名,
+        row.责任方,
+        ''
+      ])).join('');
+
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:body>
+    ${wordParagraph(title, { bold: true, size: 28, after: 260 })}
+    <w:tbl>
+      <w:tblPr>
+        <w:tblW w:w="14400" w:type="dxa"/>
+        <w:tblBorders>
+          <w:top w:val="single" w:sz="6" w:space="0" w:color="BFBFBF"/>
+          <w:left w:val="single" w:sz="6" w:space="0" w:color="BFBFBF"/>
+          <w:bottom w:val="single" w:sz="6" w:space="0" w:color="BFBFBF"/>
+          <w:right w:val="single" w:sz="6" w:space="0" w:color="BFBFBF"/>
+          <w:insideH w:val="single" w:sz="6" w:space="0" w:color="D9D9D9"/>
+          <w:insideV w:val="single" w:sz="6" w:space="0" w:color="D9D9D9"/>
+        </w:tblBorders>
+        <w:tblLayout w:type="fixed"/>
+      </w:tblPr>
+      <w:tblGrid>
+        <w:gridCol w:w="1270"/>
+        <w:gridCol w:w="7940"/>
+        <w:gridCol w:w="2890"/>
+        <w:gridCol w:w="2300"/>
+      </w:tblGrid>
+      ${wordRow(['序号', '对应文件名', '责任方', '备注/跟进'], true)}
+      ${bodyRows}
+    </w:tbl>
+    <w:sectPr>
+      <w:pgSz w:w="15840" w:h="12240" w:orient="landscape"/>
+      <w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="360" w:footer="360" w:gutter="0"/>
+    </w:sectPr>
+  </w:body>
+</w:document>`;
+    }
+
+    async function exportWord() {
+      if (!rows.length) return;
+      if (!window.JSZip) {
+        resultMetaEl.textContent = 'Word 导出需要 JSZip，请确认网络可以访问 jsDelivr。';
+        return;
+      }
+
+      const sectionName = sectionInput.value.trim();
+      const title = sectionName ? `验证笔记-${sectionName}` : '验证笔记';
+      const tableRows = rows.map(row => ({
+        编号: row.编号,
+        对应文件名: getDisplayFileName(row),
+        责任方: getResponsibilityText(row)
+      }));
+
+      const zip = new JSZip();
+      zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`);
+      zip.folder('_rels').file('.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`);
+      zip.folder('word').file('document.xml', buildWordDocumentXml(title, tableRows));
+      zip.folder('word').folder('_rels').file('document.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`);
+
+      const blob = await zip.generateAsync({
+        type: 'blob',
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${sanitizeFileName(title)}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAll() {
+      rows = [];
+      folderInput.value = '';
+      sectionInput.value = '';
+      customPartyInput.value = '';
+      resultBody.innerHTML = '';
+      summaryEl.style.display = 'none';
+      resultTable.style.display = 'none';
+      wordBtn.disabled = true;
+      setStatus('');
+      resultMetaEl.textContent = '已完成文件目录分析。';
+      showStartView();
+    }
+
+    folderInput.addEventListener('change', event => {
+      handleFolderFiles(event.target.files);
+    });
+
+    wordBtn.addEventListener('click', exportWord);
+    clearBtn.addEventListener('click', clearAll);
+    addPartyBtn.addEventListener('click', addCustomResponsibility);
+    customPartyInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addCustomResponsibility();
+      }
+    });
+    exampleBtn.addEventListener('click', openExampleModal);
+    exampleCloseBtn.addEventListener('click', closeExampleModal);
+    exampleModal.addEventListener('click', event => {
+      if (event.target === exampleModal) closeExampleModal();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !exampleModal.hidden) closeExampleModal();
+    });
+  </script>
+</body>
+</html>
