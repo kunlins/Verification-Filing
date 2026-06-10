@@ -598,7 +598,7 @@
           <thead>
             <tr>
               <th style="width: 18%;">编号</th>
-              <th>对应文件名</th>
+              <th>验证文件</th>
               <th style="width: 24%;">责任方</th>
             </tr>
           </thead>
@@ -770,7 +770,7 @@
     function createDefaultRow(code) {
       return {
         编号: code,
-        对应文件名: '董事/公司确认',
+        验证文件: '董事/公司确认',
         文件数量: 0,
         责任方: [...defaultResponsibility],
         autoFilled: true
@@ -784,7 +784,7 @@
       for (const row of sourceRows) {
         const parsed = parseCode(row.编号);
         row.责任方 = row.责任方 && row.责任方.length ? row.责任方 : [...defaultResponsibility];
-        if (!row.对应文件名) row.对应文件名 = '董事/公司确认';
+        if (!row.验证文件) row.验证文件 = '董事/公司确认';
         if (!parsed) {
           otherRows.push(row);
           continue;
@@ -862,7 +862,7 @@
     }
 
     function getDisplayFileName(row) {
-      return row.对应文件名 || '董事/公司确认';
+      return row.验证文件 || '董事/公司确认';
     }
 
     function getResponsibilityText(row) {
@@ -959,7 +959,7 @@
         const files = (map.get(code) || []).sort(naturalCompare);
         return {
           编号: code,
-          对应文件名: files.length ? files.join('\r\n') : '',
+          验证文件: files.length ? files.join('\r\n') : '',
           文件数量: files.length,
           责任方: [...defaultResponsibility]
         };
@@ -1065,7 +1065,7 @@
     function buildWordDocumentXml(title, tableRows) {
       const bodyRows = tableRows.map(row => wordRow([
         row.编号,
-        row.对应文件名,
+        row.验证文件,
         row.责任方,
         ''
       ])).join('');
@@ -1093,7 +1093,7 @@
         <w:gridCol w:w="2890"/>
         <w:gridCol w:w="2300"/>
       </w:tblGrid>
-      ${wordRow(['序号', '对应文件名', '责任方', '备注/跟进'], true)}
+      ${wordRow(['序号', '验证文件', '责任方', '备注/跟进'], true)}
       ${bodyRows}
     </w:tbl>
     <w:sectPr>
@@ -1115,7 +1115,7 @@
       const title = sectionName ? `验证笔记-${sectionName}` : '验证笔记';
       const tableRows = rows.map(row => ({
         编号: row.编号,
-        对应文件名: getDisplayFileName(row),
+        验证文件: getDisplayFileName(row),
         责任方: getResponsibilityText(row)
       }));
 
